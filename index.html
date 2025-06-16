@@ -31,7 +31,15 @@
     .wheel-container { position: relative; width: 280px; height: 280px; margin: 20px auto; }
     #spin-wheel { width: 100%; height: 100%; border-radius: 50%; background-image: conic-gradient(#f87171 0deg 45deg, #fb923c 45deg 90deg, #facc15 90deg 135deg, #4ade80 135deg 180deg, #38bdf8 180deg 225deg, #818cf8 225deg 270deg, #c084fc 270deg 315deg, #f472b6 315deg 360deg); border: 5px solid white; transition: transform 4s cubic-bezier(0.25, 1, 0.5, 1); }
     .wheel-pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid white; }
-    .spin-prize-text { font-size: 20px; position: absolute; color: #fff; font-weight: bold; width: 50%; height: 50%; display: flex; justify-content: center; align-items: center; transform-origin: 100% 100%; box-sizing: border-box; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); }
+    .spin-prize-text {position: absolute;width: 50%;height: 50%;transform-origin: 100% 100%;display: flex;justify-content: center;align-items: center;box-sizing: border-box;}
+.spin-prize-text span {
+    font-size: 20px;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    transform: rotate(-90deg) translateY(-80px); /* This is the magic part */
+    display: block;
+}
     .tab-switcher { display: flex; margin-bottom: 20px; background-color: var(--card-bg); border-radius: 12px; padding: 5px; }
     .tab-button { flex: 1; background: none; border: none; color: var(--secondary-text); padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background-color 0.3s, color 0.3s; }
     .tab-button.active { background-color: var(--accent-color); color: white; }
