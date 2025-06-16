@@ -31,15 +31,29 @@
     .wheel-container { position: relative; width: 280px; height: 280px; margin: 20px auto; }
     #spin-wheel { width: 100%; height: 100%; border-radius: 50%; background-image: conic-gradient(#f87171 0deg 45deg, #fb923c 45deg 90deg, #facc15 90deg 135deg, #4ade80 135deg 180deg, #38bdf8 180deg 225deg, #818cf8 225deg 270deg, #c084fc 270deg 315deg, #f472b6 315deg 360deg); border: 5px solid white; transition: transform 4s cubic-bezier(0.25, 1, 0.5, 1); }
     .wheel-pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid white; }
-    .spin-prize-text {position: absolute;width: 50%;height: 50%;transform-origin: 100% 100%;display: flex;justify-content: center;align-items: center;box-sizing: border-box;}
-.spin-prize-text span {
-    font-size: 20px;
-    color: #fff;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-    transform: rotate(-90deg) translateY(-80px); /* This is the magic part */
-    display: block;
-}
+    
+    /* --- THIS IS THE CORRECTED PART --- */
+    .spin-prize-text {
+        position: absolute;
+        width: 140px; /* half of wheel */
+        height: 140px; /* half of wheel */
+        left: 70px; /* 1/4 of wheel */
+        top: 70px; /* 1/4 of wheel */
+        transform-origin: 50% 50%;
+    }
+    .spin-prize-text > div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+        font-weight: bold;
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        height: 100%;
+        transform: translateY(-50%) rotate(22.5deg); /* moves text out from center and adjusts angle */
+    }
+    /* --- END OF CORRECTION --- */
+
     .tab-switcher { display: flex; margin-bottom: 20px; background-color: var(--card-bg); border-radius: 12px; padding: 5px; }
     .tab-button { flex: 1; background: none; border: none; color: var(--secondary-text); padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background-color 0.3s, color 0.3s; }
     .tab-button.active { background-color: var(--accent-color); color: white; }
@@ -146,238 +160,67 @@
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // --- CONFIGURATION ---
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhSgOt903DdPkt0X-GMJoWlM6LCS-c9Cdn-8enJypSc2x4DHRPepYFimch0fGUg5qU/exec';
-    const REWARDS_CATALOG = [
-        { id: 'gp_10', name: '₹10 Google Play Code', points: 1000 },
-        { id: 'gp_50', name: '₹50 Google Play Code', points: 5000 },
-        { id: 'gp_100', name: '₹100 Google Play Code', points: 10000 },
-    ];
+    const REWARDS_CATALOG = [ { id: 'gp_10', name: '₹10 Google Play Code', points: 1000 }, { id: 'gp_50', name: '₹50 Google Play Code', points: 5000 }, { id: 'gp_100', name: '₹100 Google Play Code', points: 10000 }, ];
     const WHEEL_PRIZES = [10, 50, 100, 5, 200, 2, 20, 0];
-
-    // --- TELEGRAM INITIALIZATION ---
     const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    tg.ready(); tg.expand();
 
-    // --- DOM ELEMENTS ---
-    const mainContent = document.querySelector('.main-content');
-    const sections = document.querySelectorAll('.section');
-    const navButtons = document.querySelectorAll('.nav-button');
-    const pointsDisplays = {
-        home: document.getElementById('home-points'),
-        profile: document.getElementById('profile-points')
-    };
-    const spinButton = document.getElementById('spin-button');
-    const spinWheel = document.getElementById('spin-wheel');
-    const freeSpinsCount = document.getElementById('free-spins-count');
-    const ticketsCount = document.getElementById('game-tickets');
-    const playCoinCatcherButton = document.getElementById('play-coin-catcher');
-    const rewardsGrid = document.getElementById('rewards-grid');
-    const profileName = document.getElementById('profile-name');
-    const profileAvatar = document.getElementById('profile-avatar');
-    const profileGamesPlayed = document.getElementById('profile-games-played');
-    const referralCodeDisplay = document.getElementById('referral-code');
-    const shareButton = document.getElementById('share-button');
+    const mainContent = document.querySelector('.main-content'), sections = document.querySelectorAll('.section'), navButtons = document.querySelectorAll('.nav-button'),
+    pointsDisplays = { home: document.getElementById('home-points'), profile: document.getElementById('profile-points') },
+    spinButton = document.getElementById('spin-button'), spinWheel = document.getElementById('spin-wheel'), freeSpinsCount = document.getElementById('free-spins-count'),
+    ticketsCount = document.getElementById('game-tickets'), playCoinCatcherButton = document.getElementById('play-coin-catcher'),
+    rewardsGrid = document.getElementById('rewards-grid'), profileName = document.getElementById('profile-name'), profileAvatar = document.getElementById('profile-avatar'),
+    profileGamesPlayed = document.getElementById('profile-games-played'), referralCodeDisplay = document.getElementById('referral-code'), shareButton = document.getElementById('share-button');
 
-    // --- STATE MANAGEMENT ---
-    let userState = {
-        points: 0,
-        tickets: 1,
-        freeSpins: 2,
-        gamesPlayed: 0,
-        userId: tg.initDataUnsafe?.user?.id || `guest_${Date.now()}`,
-        username: tg.initDataUnsafe?.user?.username || 'Guest',
-        firstName: tg.initDataUnsafe?.user?.first_name || 'Guest',
-    };
-
-    function saveState() {
-        localStorage.setItem(`plauto_user_${userState.userId}`, JSON.stringify(userState));
-    }
-
-    function loadState() {
-        const savedData = localStorage.getItem(`plauto_user_${userState.userId}`);
-        if (savedData) {
-            userState = { ...userState, ...JSON.parse(savedData) };
-        }
-        updateAllUI();
-    }
-
-    // --- UI UPDATE ---
-    function updateAllUI() {
-        pointsDisplays.home.innerText = userState.points.toLocaleString();
-        pointsDisplays.profile.innerText = userState.points.toLocaleString();
-        ticketsCount.innerText = `${userState.tickets} 🎟️`;
-        freeSpinsCount.innerText = userState.freeSpins;
-        profileName.innerText = userState.firstName;
-        profileGamesPlayed.innerText = userState.gamesPlayed;
-        referralCodeDisplay.innerText = userState.userId;
-        spinButton.disabled = userState.freeSpins <= 0;
-        playCoinCatcherButton.disabled = userState.tickets <= 0;
-    }
-
-    // --- NAVIGATION ---
-    navButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const sectionId = button.dataset.section;
-            sections.forEach(s => s.classList.toggle('active', s.id === sectionId));
-            navButtons.forEach(b => b.classList.toggle('active', b.dataset.section === sectionId));
-            mainContent.scrollTo(0, 0);
-            tg.HapticFeedback.impactOccurred('light');
-        });
-    });
-
-    // Games Tab
-    document.querySelectorAll('.tab-button').forEach(button => {
-        button.addEventListener('click', () => {
-            const tabId = button.dataset.gametab;
-            document.querySelectorAll('.game-content').forEach(c => c.classList.toggle('active', c.id === tabId));
-            document.querySelectorAll('.tab-button').forEach(b => b.classList.toggle('active', b.dataset.gametab === tabId));
-        });
-    });
+    let userState = { points: 0, tickets: 1, freeSpins: 2, gamesPlayed: 0, userId: tg.initDataUnsafe?.user?.id || `guest_${Date.now()}`, username: tg.initDataUnsafe?.user?.username || 'Guest', firstName: tg.initDataUnsafe?.user?.first_name || 'Guest', };
+    function saveState() { localStorage.setItem(`plauto_user_${userState.userId}`, JSON.stringify(userState)); }
+    function loadState() { const savedData = localStorage.getItem(`plauto_user_${userState.userId}`); if (savedData) { userState = { ...userState, ...JSON.parse(savedData) }; } updateAllUI(); }
+    function updateAllUI() { pointsDisplays.home.innerText = userState.points.toLocaleString(); pointsDisplays.profile.innerText = userState.points.toLocaleString(); ticketsCount.innerText = `${userState.tickets} 🎟️`; freeSpinsCount.innerText = userState.freeSpins; profileName.innerText = userState.firstName; profileGamesPlayed.innerText = userState.gamesPlayed; referralCodeDisplay.innerText = userState.userId; spinButton.disabled = userState.freeSpins <= 0; playCoinCatcherButton.disabled = userState.tickets <= 0; }
+    navButtons.forEach(button => button.addEventListener('click', () => { const sectionId = button.dataset.section; sections.forEach(s => s.classList.toggle('active', s.id === sectionId)); navButtons.forEach(b => b.classList.toggle('active', b.dataset.section === sectionId)); mainContent.scrollTo(0, 0); tg.HapticFeedback.impactOccurred('light'); }));
+    document.querySelectorAll('.tab-button').forEach(button => button.addEventListener('click', () => { const tabId = button.dataset.gametab; document.querySelectorAll('.game-content').forEach(c => c.classList.toggle('active', c.id === tabId)); document.querySelectorAll('.tab-button').forEach(b => b.classList.toggle('active', b.dataset.gametab === tabId)); }));
     
-    // --- FUNCTIONALITY ---
-
-    // Post data to Google Sheet
-    function sendDataToAdmin(requestType, details) {
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors', // Important for this type of request
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...userState, requestType, details })
-        })
-        .catch(error => console.error('Error sending data to admin:', error));
-    }
-
-    // Rewards
-    function loadRewards() {
-        rewardsGrid.innerHTML = '';
-        REWARDS_CATALOG.forEach(reward => {
-            const card = document.createElement('div');
-            card.className = 'reward-card';
-            card.innerHTML = `
-                <img src='https://www.gstatic.com/images/icons/material/system/2x/play_for_work_gm_blue_48dp.png' alt='Google Play'/>
-                <h3>${reward.name}</h3>
-                <p>${reward.points.toLocaleString()} Points</p>
-                <button class="redeem-button" data-id="${reward.id}" data-points="${reward.points}">Redeem</button>
-            `;
-            rewardsGrid.appendChild(card);
-        });
-    }
-
-    rewardsGrid.addEventListener('click', e => {
-        if (e.target.classList.contains('redeem-button')) {
-            const pointsNeeded = parseInt(e.target.dataset.points, 10);
-            if (userState.points >= pointsNeeded) {
-                userState.points -= pointsNeeded;
-                updateAllUI();
-                saveState();
-                alert('Success! Your request is submitted.');
-                sendDataToAdmin('Redemption', REWARDS_CATALOG.find(r => r.id === e.target.dataset.id).name);
-            } else {
-                alert('Not enough points!');
-            }
-        }
-    });
-
-    // Spin Wheel
+    function sendDataToAdmin(requestType, details) { fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...userState, requestType, details }) }).catch(error => console.error('Error sending data to admin:', error)); }
+    function loadRewards() { rewardsGrid.innerHTML = ''; REWARDS_CATALOG.forEach(reward => { const card = document.createElement('div'); card.className = 'reward-card'; card.innerHTML = `<img src='https://www.gstatic.com/images/icons/material/system/2x/play_for_work_gm_blue_48dp.png' alt='Google Play'/><h3>${reward.name}</h3><p>${reward.points.toLocaleString()} Points</p><button class="redeem-button" data-id="${reward.id}" data-points="${reward.points}">Redeem</button>`; rewardsGrid.appendChild(card); }); }
+    rewardsGrid.addEventListener('click', e => { if (e.target.classList.contains('redeem-button')) { const pointsNeeded = parseInt(e.target.dataset.points, 10); if (userState.points >= pointsNeeded) { userState.points -= pointsNeeded; updateAllUI(); saveState(); alert('Success! Your request is submitted.'); sendDataToAdmin('Redemption', REWARDS_CATALOG.find(r => r.id === e.target.dataset.id).name); } else { alert('Not enough points!'); } } });
+    
     let isSpinning = false;
     spinButton.addEventListener('click', () => {
         if (isSpinning || userState.freeSpins <= 0) return;
-        isSpinning = true;
-        userState.freeSpins--;
-        spinButton.disabled = true;
-
-        const randomSpins = Math.floor(Math.random() * 5) + 5;
-        const prizeIndex = Math.floor(Math.random() * WHEEL_PRIZES.length);
-        const prize = WHEEL_PRIZES[prizeIndex];
-        const prizeAngle = 360 / WHEEL_PRIZES.length;
-        const stopAngle = (randomSpins * 360) + (prizeIndex * prizeAngle) + (prizeAngle / 2);
-        
+        isSpinning = true; userState.freeSpins--; spinButton.disabled = true;
+        const randomSpins = Math.floor(Math.random() * 5) + 5, prizeIndex = Math.floor(Math.random() * WHEEL_PRIZES.length), prize = WHEEL_PRIZES[prizeIndex],
+        prizeAngle = 360 / WHEEL_PRIZES.length, stopAngle = (randomSpins * 360) + (prizeIndex * prizeAngle) - (prizeAngle / 2);
         spinWheel.style.transform = `rotate(${stopAngle}deg)`;
-
-        setTimeout(() => {
-            isSpinning = false;
-            userState.points += prize;
-            alert(`You won ${prize} points!`);
-            updateAllUI();
-            saveState();
-            tg.HapticFeedback.notificationOccurred('success');
-        }, 4100);
+        setTimeout(() => { isSpinning = false; userState.points += prize; alert(`You won ${prize} points!`); updateAllUI(); saveState(); tg.HapticFeedback.notificationOccurred('success'); }, 4100);
     });
 
-    // Ads
-    document.getElementById('ad-spin-placeholder').addEventListener('click', () => {
-        alert('Ad Network 2 (Bitmedia) code goes here. Simulating ad watch for now.');
-        setTimeout(() => {
-            userState.freeSpins++;
-            alert('You earned 1 free spin!');
-            updateAllUI(); saveState();
-        }, 2000);
-    });
-     document.getElementById('ad-ticket-placeholder').addEventListener('click', () => {
-        alert('Ad Network 1 (Adsgram) code goes here. Simulating ad watch for now.');
-        setTimeout(() => {
-            userState.tickets++;
-            alert('You earned 1 ticket! 🎟️');
-            updateAllUI(); saveState();
-        }, 2000);
-    });
+    document.getElementById('ad-spin-placeholder').addEventListener('click', () => { alert('Ad Network 2 (Bitmedia) code goes here. Simulating ad watch for now.'); setTimeout(() => { userState.freeSpins++; alert('You earned 1 free spin!'); updateAllUI(); saveState(); }, 2000); });
+    document.getElementById('ad-ticket-placeholder').addEventListener('click', () => { alert('Ad Network 1 (Adsgram) code goes here. Simulating ad watch for now.'); setTimeout(() => { userState.tickets++; alert('You earned 1 ticket! 🎟️'); updateAllUI(); saveState(); }, 2000); });
     
-    // Mini-game
-    playCoinCatcherButton.addEventListener('click', () => {
-        if (userState.tickets > 0) {
-            userState.tickets--;
-            userState.gamesPlayed++;
-            updateAllUI(); saveState();
-            startGame();
-        }
-    });
-    
-    function startGame() {
-        const gameContainer = document.getElementById('simple-game-container');
-        const gameArea = document.getElementById('game-area');
-        const gameInfo = document.getElementById('game-info');
-        gameContainer.style.display = 'flex';
-        let score = 0; let time = 15;
-        gameInfo.innerText = `Score: ${score} | Time: ${time}`;
+    playCoinCatcherButton.addEventListener('click', () => { if (userState.tickets > 0) { userState.tickets--; userState.gamesPlayed++; updateAllUI(); saveState(); startGame(); } });
+    function startGame() { const gameContainer=document.getElementById('simple-game-container'), gameArea=document.getElementById('game-area'), gameInfo=document.getElementById('game-info'); gameContainer.style.display='flex'; let score=0, time=15; gameInfo.innerText=`Score: ${score} | Time: ${time}`; function createObject(){if(time<=0)return; const o=document.createElement('div');o.className='falling-object';o.style.left=`${Math.random()*90}%`;o.style.top='-40px';o.onclick=()=>{score++;gameInfo.innerText=`Score:${score}|Time:${time}`;o.remove();};gameArea.appendChild(o); let fI=setInterval(()=>{o.style.top=`${parseInt(o.style.top)+5}px`;if(parseInt(o.style.top)>gameArea.clientHeight){o.remove();clearInterval(fI)}},20)} const gameInterval=setInterval(createObject,1000), timerInterval=setInterval(()=>{time--; gameInfo.innerText=`Score: ${score} | Time: ${time}`;if(time<=0)endGame()},1000); const endGame=()=>{clearInterval(gameInterval);clearInterval(timerInterval);gameArea.innerHTML='';gameContainer.style.display='none';alert(`Game over! You scored ${score} points.`);userState.points+=score;updateAllUI();saveState()}; document.getElementById('close-game-button').onclick=endGame }
 
-        function createObject() { if (time <= 0) return; const o=document.createElement('div');o.className='falling-object';o.style.left=`${Math.random()*90}%`;o.style.top='-40px';o.onclick=()=>{score++;gameInfo.innerText=`Score:${score}|Time:${time}`;o.remove();};gameArea.appendChild(o); let fI=setInterval(()=>{o.style.top=`${parseInt(o.style.top)+5}px`;if(parseInt(o.style.top)>gameArea.clientHeight){o.remove();clearInterval(fI)}},20)}
-        const gameInterval = setInterval(createObject, 1000);
-        const timerInterval = setInterval(() => { time--; gameInfo.innerText = `Score: ${score} | Time: ${time}`; if (time <= 0) endGame(); }, 1000);
-        
-        const endGame = () => {
-            clearInterval(gameInterval); clearInterval(timerInterval); gameArea.innerHTML = '';
-            gameContainer.style.display = 'none';
-            alert(`Game over! You scored ${score} points.`);
-            userState.points += score;
-            updateAllUI(); saveState();
-        };
-        document.getElementById('close-game-button').onclick = endGame;
-    }
-
-    // Referral
     shareButton.addEventListener('click', () => {
-        const text = `Join me on this cool app and get a bonus! My referral code is ${userState.userId}.`;
-        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(tg.initDataUnsafe.start_param ? `https://t.me/${tg.initDataUnsafe.start_param.botUsername}?start=${userState.userId}` : '')}&text=${encodeURIComponent(text)}`);
+        const botUsername = tg.initDataUnsafe.start_param ? tg.initDataUnsafe.start_param : 'YourBotUsername'; // Fallback
+        const referralLink = `https://t.me/${botUsername}?start=${userState.userId}`;
+        const text = `Join me on this cool app and get a bonus! Use my referral link:`;
+        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`);
     });
 
-    // --- INITIALIZATION ---
     function initialize() {
+        spinWheel.innerHTML = '';
         const prizeAngle = 360 / WHEEL_PRIZES.length;
         WHEEL_PRIZES.forEach((prize, i) => {
-            const prizeText = document.createElement('div');
-            prizeText.className = 'spin-prize-text';
+            const prizeElement = document.createElement('div');
+            prizeElement.className = 'spin-prize-text';
             const rotation = prizeAngle * i;
-            prizeText.style.transform = `rotate(${rotation}deg) translate(70px) rotate(${-rotation}deg)`;
-            prizeText.innerHTML = `<span>${prize}</span>`;
-            spinWheel.appendChild(prizeText);
+            prizeElement.style.transform = `rotate(${rotation}deg)`;
+            prizeElement.innerHTML = `<div><span>${prize}</span></div>`;
+            spinWheel.appendChild(prizeElement);
         });
-        
         loadRewards();
         loadState();
     }
-
     initialize();
 });
 </script>
