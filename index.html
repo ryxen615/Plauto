@@ -3,22 +3,13 @@
 <head>
     <meta charset='UTF-8'/>
     <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no'/>
-    <title>Play & Earn V2</title>
-
+    <title>Play & Earn</title>
     <script src='https://telegram.org/js/telegram-web-app.js'></script>
-    
     <style>
     :root {
-        --bg-gradient-start: #1e2a3e;
-        --bg-gradient-end: #0f172a;
-        --primary-text: #e2e8f0;
-        --secondary-text: #94a3b8;
-        --card-bg: rgba(45, 55, 72, 0.5);
-        --accent-color: #38bdf8;
-        --green-color: #34d399;
-        --red-color: #f87171;
-        --gold-color: #facc15;
-        --nav-bg: rgba(15, 23, 42, 0.8);
+        --bg-gradient-start: #1e2a3e; --bg-gradient-end: #0f172a; --primary-text: #e2e8f0; --secondary-text: #94a3b8;
+        --card-bg: rgba(45, 55, 72, 0.5); --accent-color: #38bdf8; --green-color: #34d399; --red-color: #f87171;
+        --gold-color: #facc15; --nav-bg: rgba(15, 23, 42, 0.8);
     }
     body, html { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: linear-gradient(160deg, var(--bg-gradient-start), var(--bg-gradient-end)); color: var(--primary-text); height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
     .main-content { flex-grow: 1; overflow-y: auto; padding: 20px 20px 80px 20px; -webkit-overflow-scrolling: touch; }
@@ -30,7 +21,7 @@
     p { color: var(--secondary-text); line-height: 1.5; }
     .card { background-color: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
     .button-primary { background: linear-gradient(45deg, var(--accent-color), #67e8f9); color: #0c182f; padding: 12px 25px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; width: 100%; box-sizing: border-box; }
-    .button-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3); }
+    .button-primary:disabled { background: var(--secondary-text); cursor: not-allowed; }
     .bottom-nav { display: flex; justify-content: space-around; background-color: var(--nav-bg); padding: 10px 0; border-top: 1px solid rgba(255, 255, 255, 0.1); position: fixed; bottom: 0; left: 0; width: 100%; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
     .nav-button { background: none; border: none; color: var(--secondary-text); display: flex; flex-direction: column; align-items: center; font-size: 10px; cursor: pointer; transition: color 0.3s; }
     .nav-button svg { width: 24px; height: 24px; margin-bottom: 4px; fill: var(--secondary-text); transition: fill 0.3s; }
@@ -40,7 +31,7 @@
     .wheel-container { position: relative; width: 280px; height: 280px; margin: 20px auto; }
     #spin-wheel { width: 100%; height: 100%; border-radius: 50%; background-image: conic-gradient(#f87171 0deg 45deg, #fb923c 45deg 90deg, #facc15 90deg 135deg, #4ade80 135deg 180deg, #38bdf8 180deg 225deg, #818cf8 225deg 270deg, #c084fc 270deg 315deg, #f472b6 315deg 360deg); border: 5px solid white; transition: transform 4s cubic-bezier(0.25, 1, 0.5, 1); }
     .wheel-pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid white; }
-    .spin-prize-text { font-size: 14px; position: absolute; color: #fff; font-weight: bold; width: 50%; height: 50%; text-align: center; transform-origin: 100% 100%; padding-top: 15px; box-sizing: border-box; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+    .spin-prize-text { font-size: 20px; position: absolute; color: #fff; font-weight: bold; width: 50%; height: 50%; display: flex; justify-content: center; align-items: center; transform-origin: 100% 100%; box-sizing: border-box; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); }
     .tab-switcher { display: flex; margin-bottom: 20px; background-color: var(--card-bg); border-radius: 12px; padding: 5px; }
     .tab-button { flex: 1; background: none; border: none; color: var(--secondary-text); padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background-color 0.3s, color 0.3s; }
     .tab-button.active { background-color: var(--accent-color); color: white; }
@@ -48,18 +39,22 @@
     .game-content.active { display: block; }
     .list-item { background-color: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     .play-button { background-color: var(--green-color); color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; }
-    .play-button.coming-soon { background-color: var(--secondary-text); }
     .reward-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
     .reward-card { background-color: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; text-align: center; }
     .reward-card img { width: 60px; height: 60px; margin-bottom: 10px; }
     .redeem-button { background-color: var(--gold-color); color: #422006; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+    .redeem-button:disabled { background-color: var(--secondary-text); }
     .profile-header { text-align: center; margin-bottom: 20px; }
     .profile-header .avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-color); }
     .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
     .info-row:last-child { border-bottom: none; }
     .info-label { color: var(--secondary-text); }
     .info-value { font-weight: bold; }
-    .ad-placeholder { border: 2px dashed var(--secondary-text); border-radius: 12px; padding: 20px; text-align: center; color: var(--secondary-text); margin-top: 20px; }
+    .ad-placeholder { border: 2px dashed var(--secondary-text); border-radius: 12px; padding: 20px; text-align: center; color: var(--secondary-text); margin-top: 20px; cursor: pointer; }
+    #simple-game-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
+    #game-area { width: 90%; height: 70%; background-color: var(--bg-gradient-end); border-radius: 12px; position: relative; overflow: hidden; }
+    .falling-object { position: absolute; width: 40px; height: 40px; background-color: var(--gold-color); border-radius: 50%; cursor: pointer; }
+    #game-info { margin-top: 15px; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -67,16 +62,15 @@
     <div id='home-section' class='section active'>
         <div class='card' style='text-align:center;'>
             <h3>Total Points</h3>
-            <p id='home-points' style='font-size: 28px; font-weight: bold; color: var(--gold-color); margin:0;'>1,250</p>
+            <p id='home-points' style='font-size: 28px; font-weight: bold; color: var(--gold-color); margin:0;'>0</p>
         </div>
         <div class='wheel-container'>
-            <div id='spin-wheel'></div>
-            <div class='wheel-pointer'></div>
+            <div id='spin-wheel'></div><div class='wheel-pointer'></div>
         </div>
-        <button class='button-primary'>SPIN</button>
-        <div class='ad-placeholder'>
-            <p>AD NETWORK 2 (Bitmedia)</p>
-            Watch Ad for an Extra Spin
+        <p>Your free spins: <span id="free-spins-count">0</span></p>
+        <button id="spin-button" class='button-primary'>SPIN</button>
+        <div class='ad-placeholder' id="ad-spin-placeholder">
+            <p>AD NETWORK 2 (Bitmedia)</p>Watch Ad for an Extra Spin
         </div>
     </div>
     <div id='games-section' class='section'>
@@ -86,88 +80,54 @@
             <button class='tab-button' data-gametab='tournaments'>Tournaments</button>
         </div>
         <div id='mini-games' class='game-content active'>
-            <div class='card'>
-                <p>Play games to earn points! You need 1 ticket to play.</p>
-                <p style='font-weight:bold;'>Your Tickets: <span id='game-tickets'>5 🎟️</span></p>
-            </div>
+            <div class='card'><p>Your Tickets: <span id='game-tickets' style='font-weight:bold;'>0 🎟️</span></p></div>
             <div class='list-item'>
                 <div><h3>Coin Catcher</h3><p>Catch falling coins!</p></div>
-                <button class='play-button'>Play</button>
+                <button class='play-button' id="play-coin-catcher">Play</button>
             </div>
-            <div class='list-item'>
-                <div><h3>Astro Jumper</h3><p>Jump through space.</p></div>
-                <button class='play-button coming-soon'>Soon</button>
-            </div>
-            <div class='ad-placeholder'>
-                <p>AD NETWORK 1 (Adsgram)</p>
-                Watch Ad for a Ticket
+            <div class='ad-placeholder' id="ad-ticket-placeholder">
+                <p>AD NETWORK 1 (Adsgram)</p>Watch Ad for a Ticket
             </div>
         </div>
         <div id='tournaments' class='game-content'>
-            <div class='list-item'>
-                <div><h3>Morning Mayhem ☀️</h3><p>Entry: 100 Points | Prize: 5000</p></div>
-                <button class='play-button'>Join</button>
-            </div>
-            <div class='list-item'>
-                <div><h3>Weekend Warriors ⚔️</h3><p>Entry: 250 Points | Prize: 15000</p></div>
-                <button class='play-button coming-soon'>Soon</button>
-            </div>
+             <div class='card'><p>This feature is coming soon!</p></div>
         </div>
     </div>
     <div id='rewards-section' class='section'>
         <h2>Redeem Rewards</h2>
-        <div class='reward-grid'>
-            <div class='reward-card'>
-                <img src='https://www.gstatic.com/images/icons/material/system/2x/play_for_work_gm_blue_48dp.png' alt='Google Play'/>
-                <h3>₹10 Code</h3>
-                <p>1000 Points</p>
-                <button class='redeem-button'>Redeem</button>
-            </div>
-            <div class='reward-card'>
-                <img src='https://www.gstatic.com/images/icons/material/system/2x/play_for_work_gm_blue_48dp.png' alt='Google Play'/>
-                <h3>₹50 Code</h3>
-                <p>5000 Points</p>
-                <button class='redeem-button'>Redeem</button>
-            </div>
-             <div class='reward-card'>
-                <img src='https://www.gstatic.com/images/icons/material/system/2x/play_for_work_gm_blue_48dp.png' alt='Google Play'/>
-                <h3>₹100 Code</h3>
-                <p>10000 Points</p>
-                <button class='redeem-button'>Redeem</button>
-            </div>
+        <div class='reward-grid' id="rewards-grid">
+            <!-- Rewards will be loaded by JS -->
         </div>
-         <div class='ad-placeholder'>
-            <p>AD NETWORK 3 (a-ads.com)</p>
-            Small Banner Ad
-        </div>
+         <div class='ad-placeholder'><p>AD NETWORK 3 (a-ads.com)</p>Small Banner Ad</div>
     </div>
     <div id='profile-section' class='section'>
         <div class='profile-header'>
-            <img class='avatar' src='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128' alt='Avatar'/>
-            <h2 id='profile-name' style='border:none; margin-bottom:0;'>Username</h2>
+            <img class='avatar' id="profile-avatar" src='https://www.gravatar.com/avatar/?d=mp' alt='Avatar'/>
+            <h2 id='profile-name' style='border:none; margin-bottom:0;'>User</h2>
         </div>
         <div class='card'>
-            <div class='info-row'><span class='info-label'>Points</span><span class='info-value' id='profile-points'>1,250</span></div>
-            <div class='info-row'><span class='info-label'>Games Played</span><span class='info-value'>15</span></div>
-            <div class='info-row'><span class='info-label'>Tournaments Won</span><span class='info-value'>2</span></div>
+            <div class='info-row'><span class='info-label'>Points</span><span class='info-value' id='profile-points'>0</span></div>
+            <div class='info-row'><span class='info-label'>Games Played</span><span class='info-value' id='profile-games-played'>0</span></div>
         </div>
         <div class='card'>
             <h3>Refer & Earn</h3>
             <p>Share your code with friends. You both get 100 points!</p>
-            <div class='info-row'>
-                <span class='info-label'>Your Code</span>
-                <span class='info-value' id='referral-code'>XYZ123</span>
-            </div>
-            <button class='button-primary' style='margin-top:15px;'>Share Code</button>
+            <div class='info-row'><span class='info-label'>Your Code</span><span class='info-value' id='referral-code'>-</span></div>
+            <button class='button-primary' id="share-button" style='margin-top:15px;'>Share Code</button>
         </div>
     </div>
+</div>
+<div id='simple-game-container'>
+    <div id='game-info'>Score: 0 | Time: 15</div>
+    <div id='game-area'></div>
+    <button id='close-game-button' class='button-primary' style='margin-top: 15px; background:var(--red-color)'>Close</button>
 </div>
 <div class='bottom-nav'>
     <button class='nav-button active' data-section='home-section'>
         <svg viewBox='0 0 24 24'><path d='M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' fill='#fff'/></svg><span>Home</span>
     </button>
     <button class='nav-button' data-section='games-section'>
-        <svg viewBox='0 0 24 24'><path d='M15.5 2.5a2.5 2.5 0 0 1 0 5 2.5 2.5 0 0 1 0-5M21 11.5v-1c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v1.5c0 .8.6 1.5 1.5 1.5h15c.8 0 1.5-.7 1.5-1.5m-1.5-2.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5M21 18.5v-1c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v1.5c0 .8.6 1.5 1.5 1.5h15c.8 0 1.5-.7 1.5-1.5z' fill='#fff'/></svg><span>Games</span>
+        <svg viewBox='0 0 24 24'><path d='M21,2H3A2,2 0 0,0 1,4V10A2,2 0 0,0 3,12H21A2,2 0 0,0 23,10V4A2,2 0 0,0 21,2M21,14H3A2,2 0 0,0 1,16V20A2,2 0 0,0 3,22H21A2,2 0 0,0 23,20V16A2,2 0 0,0 21,14M7,7A1,1 0 0,1 8,8A1,1 0 0,1 7,9A1,1 0 0,1 6,8A1,1 0 0,1 7,7M7,18A1,1 0 0,1 8,19A1,1 0 0,1 7,20A1,1 0 0,1 6,19A1,1 0 0,1 7,18Z' fill='#fff'/></svg><span>Games</span>
     </button>
     <button class='nav-button' data-section='rewards-section'>
         <svg viewBox='0 0 24 24'><path d='M20 4H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 14H4v-6h16zm0-10H4V6h16z' fill='#fff'/></svg><span>Rewards</span>
@@ -178,50 +138,240 @@
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // --- CONFIGURATION ---
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhSgOt903DdPkt0X-GMJoWlM6LCS-c9Cdn-8enJypSc2x4DHRPepYFimch0fGUg5qU/exec';
+    const REWARDS_CATALOG = [
+        { id: 'gp_10', name: '₹10 Google Play Code', points: 1000 },
+        { id: 'gp_50', name: '₹50 Google Play Code', points: 5000 },
+        { id: 'gp_100', name: '₹100 Google Play Code', points: 10000 },
+    ];
+    const WHEEL_PRIZES = [10, 50, 100, 5, 200, 2, 20, 0];
+
+    // --- TELEGRAM INITIALIZATION ---
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
-    const navButtons = document.querySelectorAll('.nav-button');
+
+    // --- DOM ELEMENTS ---
+    const mainContent = document.querySelector('.main-content');
     const sections = document.querySelectorAll('.section');
-    function showSection(sectionId) {
-        sections.forEach(section => section.classList.toggle('active', section.id === sectionId));
-        navButtons.forEach(button => button.classList.toggle('active', button.dataset.section === sectionId));
+    const navButtons = document.querySelectorAll('.nav-button');
+    const pointsDisplays = {
+        home: document.getElementById('home-points'),
+        profile: document.getElementById('profile-points')
+    };
+    const spinButton = document.getElementById('spin-button');
+    const spinWheel = document.getElementById('spin-wheel');
+    const freeSpinsCount = document.getElementById('free-spins-count');
+    const ticketsCount = document.getElementById('game-tickets');
+    const playCoinCatcherButton = document.getElementById('play-coin-catcher');
+    const rewardsGrid = document.getElementById('rewards-grid');
+    const profileName = document.getElementById('profile-name');
+    const profileAvatar = document.getElementById('profile-avatar');
+    const profileGamesPlayed = document.getElementById('profile-games-played');
+    const referralCodeDisplay = document.getElementById('referral-code');
+    const shareButton = document.getElementById('share-button');
+
+    // --- STATE MANAGEMENT ---
+    let userState = {
+        points: 0,
+        tickets: 1,
+        freeSpins: 2,
+        gamesPlayed: 0,
+        userId: tg.initDataUnsafe?.user?.id || `guest_${Date.now()}`,
+        username: tg.initDataUnsafe?.user?.username || 'Guest',
+        firstName: tg.initDataUnsafe?.user?.first_name || 'Guest',
+    };
+
+    function saveState() {
+        localStorage.setItem(`plauto_user_${userState.userId}`, JSON.stringify(userState));
     }
+
+    function loadState() {
+        const savedData = localStorage.getItem(`plauto_user_${userState.userId}`);
+        if (savedData) {
+            userState = { ...userState, ...JSON.parse(savedData) };
+        }
+        updateAllUI();
+    }
+
+    // --- UI UPDATE ---
+    function updateAllUI() {
+        pointsDisplays.home.innerText = userState.points.toLocaleString();
+        pointsDisplays.profile.innerText = userState.points.toLocaleString();
+        ticketsCount.innerText = `${userState.tickets} 🎟️`;
+        freeSpinsCount.innerText = userState.freeSpins;
+        profileName.innerText = userState.firstName;
+        profileGamesPlayed.innerText = userState.gamesPlayed;
+        referralCodeDisplay.innerText = userState.userId;
+        spinButton.disabled = userState.freeSpins <= 0;
+        playCoinCatcherButton.disabled = userState.tickets <= 0;
+    }
+
+    // --- NAVIGATION ---
     navButtons.forEach(button => {
         button.addEventListener('click', () => {
             const sectionId = button.dataset.section;
-            showSection(sectionId);
+            sections.forEach(s => s.classList.toggle('active', s.id === sectionId));
+            navButtons.forEach(b => b.classList.toggle('active', b.dataset.section === sectionId));
+            mainContent.scrollTo(0, 0);
             tg.HapticFeedback.impactOccurred('light');
         });
     });
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const gameContents = document.querySelectorAll('.game-content');
-    tabButtons.forEach(button => {
+
+    // Games Tab
+    document.querySelectorAll('.tab-button').forEach(button => {
         button.addEventListener('click', () => {
             const tabId = button.dataset.gametab;
-            gameContents.forEach(content => content.classList.toggle('active', content.id === tabId));
-            tabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.gametab === tabId));
+            document.querySelectorAll('.game-content').forEach(c => c.classList.toggle('active', c.id === tabId));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.toggle('active', b.dataset.gametab === tabId));
         });
     });
-    document.querySelector('#home-section .button-primary').addEventListener('click', () => alert('Spin logic will be added later!'));
-    document.querySelector('#mini-games .play-button').addEventListener('click', () => alert('Game logic will be added later!'));
-    document.querySelector('#tournaments .play-button').addEventListener('click', () => alert('Tournament joining request will be sent to admin. (Functionality coming soon)'));
-    document.querySelectorAll('.redeem-button').forEach(btn => {
-        btn.addEventListener('click', () => alert('Redeem request will be sent to admin. (Functionality coming soon)'));
+    
+    // --- FUNCTIONALITY ---
+
+    // Post data to Google Sheet
+    function sendDataToAdmin(requestType, details) {
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Important for this type of request
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...userState, requestType, details })
+        })
+        .catch(error => console.error('Error sending data to admin:', error));
+    }
+
+    // Rewards
+    function loadRewards() {
+        rewardsGrid.innerHTML = '';
+        REWARDS_CATALOG.forEach(reward => {
+            const card = document.createElement('div');
+            card.className = 'reward-card';
+            card.innerHTML = `
+                <img src='https://www.gstatic.com/images/icons/material/system/2x/play_for_work_gm_blue_48dp.png' alt='Google Play'/>
+                <h3>${reward.name}</h3>
+                <p>${reward.points.toLocaleString()} Points</p>
+                <button class="redeem-button" data-id="${reward.id}" data-points="${reward.points}">Redeem</button>
+            `;
+            rewardsGrid.appendChild(card);
+        });
+    }
+
+    rewardsGrid.addEventListener('click', e => {
+        if (e.target.classList.contains('redeem-button')) {
+            const pointsNeeded = parseInt(e.target.dataset.points, 10);
+            if (userState.points >= pointsNeeded) {
+                userState.points -= pointsNeeded;
+                updateAllUI();
+                saveState();
+                alert('Success! Your request is submitted.');
+                sendDataToAdmin('Redemption', REWARDS_CATALOG.find(r => r.id === e.target.dataset.id).name);
+            } else {
+                alert('Not enough points!');
+            }
+        }
     });
-    document.querySelector('#profile-section .button-primary').addEventListener('click', () => alert('Referral sharing link will be generated here.'));
-    const spinWheel = document.getElementById('spin-wheel');
-    const wheelPrizes = [10, 50, 100, 5, 200, 2, 20, 0];
-    const prizeAngle = 360 / wheelPrizes.length;
-    wheelPrizes.forEach((prize, i) => {
-        const prizeText = document.createElement('div');
-        prizeText.className = 'spin-prize-text';
-        prizeText.style.transform = `rotate(${prizeAngle * i + prizeAngle / 2}deg)`;
-        prizeText.textContent = prize;
-        spinWheel.appendChild(prizeText);
+
+    // Spin Wheel
+    let isSpinning = false;
+    spinButton.addEventListener('click', () => {
+        if (isSpinning || userState.freeSpins <= 0) return;
+        isSpinning = true;
+        userState.freeSpins--;
+        spinButton.disabled = true;
+
+        const randomSpins = Math.floor(Math.random() * 5) + 5;
+        const prizeIndex = Math.floor(Math.random() * WHEEL_PRIZES.length);
+        const prize = WHEEL_PRIZES[prizeIndex];
+        const prizeAngle = 360 / WHEEL_PRIZES.length;
+        const stopAngle = (randomSpins * 360) + (prizeIndex * prizeAngle) + (prizeAngle / 2);
+        
+        spinWheel.style.transform = `rotate(${stopAngle}deg)`;
+
+        setTimeout(() => {
+            isSpinning = false;
+            userState.points += prize;
+            alert(`You won ${prize} points!`);
+            updateAllUI();
+            saveState();
+            tg.HapticFeedback.notificationOccurred('success');
+        }, 4100);
     });
-    showSection('home-section');
+
+    // Ads
+    document.getElementById('ad-spin-placeholder').addEventListener('click', () => {
+        alert('Ad Network 2 (Bitmedia) code goes here. Simulating ad watch for now.');
+        setTimeout(() => {
+            userState.freeSpins++;
+            alert('You earned 1 free spin!');
+            updateAllUI(); saveState();
+        }, 2000);
+    });
+     document.getElementById('ad-ticket-placeholder').addEventListener('click', () => {
+        alert('Ad Network 1 (Adsgram) code goes here. Simulating ad watch for now.');
+        setTimeout(() => {
+            userState.tickets++;
+            alert('You earned 1 ticket! 🎟️');
+            updateAllUI(); saveState();
+        }, 2000);
+    });
+    
+    // Mini-game
+    playCoinCatcherButton.addEventListener('click', () => {
+        if (userState.tickets > 0) {
+            userState.tickets--;
+            userState.gamesPlayed++;
+            updateAllUI(); saveState();
+            startGame();
+        }
+    });
+    
+    function startGame() {
+        const gameContainer = document.getElementById('simple-game-container');
+        const gameArea = document.getElementById('game-area');
+        const gameInfo = document.getElementById('game-info');
+        gameContainer.style.display = 'flex';
+        let score = 0; let time = 15;
+        gameInfo.innerText = `Score: ${score} | Time: ${time}`;
+
+        function createObject() { if (time <= 0) return; const o=document.createElement('div');o.className='falling-object';o.style.left=`${Math.random()*90}%`;o.style.top='-40px';o.onclick=()=>{score++;gameInfo.innerText=`Score:${score}|Time:${time}`;o.remove();};gameArea.appendChild(o); let fI=setInterval(()=>{o.style.top=`${parseInt(o.style.top)+5}px`;if(parseInt(o.style.top)>gameArea.clientHeight){o.remove();clearInterval(fI)}},20)}
+        const gameInterval = setInterval(createObject, 1000);
+        const timerInterval = setInterval(() => { time--; gameInfo.innerText = `Score: ${score} | Time: ${time}`; if (time <= 0) endGame(); }, 1000);
+        
+        const endGame = () => {
+            clearInterval(gameInterval); clearInterval(timerInterval); gameArea.innerHTML = '';
+            gameContainer.style.display = 'none';
+            alert(`Game over! You scored ${score} points.`);
+            userState.points += score;
+            updateAllUI(); saveState();
+        };
+        document.getElementById('close-game-button').onclick = endGame;
+    }
+
+    // Referral
+    shareButton.addEventListener('click', () => {
+        const text = `Join me on this cool app and get a bonus! My referral code is ${userState.userId}.`;
+        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(tg.initDataUnsafe.start_param ? `https://t.me/${tg.initDataUnsafe.start_param.botUsername}?start=${userState.userId}` : '')}&text=${encodeURIComponent(text)}`);
+    });
+
+    // --- INITIALIZATION ---
+    function initialize() {
+        const prizeAngle = 360 / WHEEL_PRIZES.length;
+        WHEEL_PRIZES.forEach((prize, i) => {
+            const prizeText = document.createElement('div');
+            prizeText.className = 'spin-prize-text';
+            const rotation = prizeAngle * i;
+            prizeText.style.transform = `rotate(${rotation}deg) translate(70px) rotate(${-rotation}deg)`;
+            prizeText.innerHTML = `<span>${prize}</span>`;
+            spinWheel.appendChild(prizeText);
+        });
+        
+        loadRewards();
+        loadState();
+    }
+
+    initialize();
 });
 </script>
 </body>
-                                                                                                    </html>
+</html>
